@@ -10,6 +10,29 @@ body{
     background-color: #1c1b1b;
 }
 
+.back-home {
+
+  margin-top: 15px;
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 10px 16px;
+
+  background-color: #333;
+  color: #fff;
+
+  text-decoration: none;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.back-home:hover {
+  background-color: #555;
+}
+
 h1{
     color: white;
 }
