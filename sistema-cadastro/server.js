@@ -1,6 +1,7 @@
 const express = require("express")
 const app = express()
 const usuarios = []
+let proximoId = 1
 app.use(express.json())
 const port = 3000
 
@@ -8,29 +9,40 @@ app.get("/", (req, res) => {
   res.send("Olá. O meu primeiro servidor com express funcionou.")
 })
 
-app.get("/usuarios", (req, res)=>{
-  res.json(usuarios);
+app.get("/usuarios", (req, res) => {
+  res.json(usuarios)
 })
 
 app.get("/usuarios/:id", (req, res) => {
-  const id = req.params.id
+  const id = Number(req.params.id)
 
-  res.json({
-    id: id,
-  })
+  const usuario =  usuarios.find(usuario => usuario.id === id)
+
+  if(!usuario) {
+    return res.status(404).json({
+      mensagem: "Usuário não encontrado"
+    })
+  }
+
+  res.json(usuario)
 })
 
 app.post("/usuarios", (req, res) => {
-
   const novoUsuario = req.body
 
-  usuarios.push(novoUsuario)
+  const usuario = {
+    id: proximoId,
+    nome: novoUsuario.nome,
+    email: novoUsuario.email,
+  }
 
-  console.log(novoUsuario)
+  usuarios.push(usuario)
+
+  proximoId++
 
   return res.status(201).json({
     mensagem: "Usuário criado com sucesso!",
-    usuario: novoUsuario,
+    usuario: usuario,
   })
 })
 
