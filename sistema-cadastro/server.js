@@ -4,6 +4,20 @@ const usuarios = []
 let proximoId = 1
 app.use(express.json())
 const port = 3000
+const supabase = require("./supabase")
+
+app.get("/teste-banco", async (req, res) => {
+  const { data, error } = await supabase.from("usuarios").select("*")
+
+  if (error) {
+    return res.status(500).json({
+      mensagem: "Erro ao consultar banco",
+      erro: error.message,
+    })
+  }
+
+  res.json(data)
+})
 
 app.get("/", (req, res) => {
   res.send("Olá. O meu primeiro servidor com express funcionou.")
@@ -27,22 +41,29 @@ app.get("/usuarios/:id", (req, res) => {
   res.json(usuario)
 })
 
-app.post("/usuarios", (req, res) => {
-  const novoUsuario = req.body
+app.post("/usuarios", async (req, res) => {
+  const { nome, email } = req.body
 
-  const usuario = {
-    id: proximoId,
-    nome: novoUsuario.nome,
-    email: novoUsuario.email,
+  const { data, error } = await supabase
+    .from("usuarios")
+    .insert([
+      {
+        nome: nome,
+        email: email,
+      },
+    ])
+    .select()
+
+  if (error) {
+    return res.status(500).json({
+      mensagem: "Erro ao cadastrar usuário",
+      erro: error.message,
+    })
   }
-
-  usuarios.push(usuario)
-
-  proximoId++
 
   return res.status(201).json({
     mensagem: "Usuário criado com sucesso!",
-    usuario: usuario,
+    usuario: data[0],
   })
 })
 
