@@ -23,8 +23,19 @@ app.get("/", (req, res) => {
   res.send("Olá. O meu primeiro servidor com express funcionou.")
 })
 
-app.get("/usuarios", (req, res) => {
-  res.json(usuarios)
+app.get("/usuarios", async (req, res) => {
+  const { data, error } = await supabase
+  .from("usuarios")
+  .select("*")
+
+  if(error){
+    return res.status(500).json({
+      mensagem: "Erro ao buscar usuários",
+      erro: error.message
+    })
+
+    return res.json(data)
+  }
 })
 
 app.get("/usuarios/:id", (req, res) => {
