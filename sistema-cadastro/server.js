@@ -24,32 +24,39 @@ app.get("/", (req, res) => {
 })
 
 app.get("/usuarios", async (req, res) => {
-  const { data, error } = await supabase
-  .from("usuarios")
-  .select("*")
 
-  if(error){
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("*")
+
+  if (error) {
     return res.status(500).json({
       mensagem: "Erro ao buscar usuários",
-      erro: error.message
+      erro: error.message,
     })
-
-    return res.json(data)
   }
+
+  return res.json(data)
 })
 
-app.get("/usuarios/:id", (req, res) => {
+app.get("/usuarios/:id", async (req, res) => {
+
   const id = Number(req.params.id)
 
-  const usuario = usuarios.find((usuario) => usuario.id === id)
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("*")
+    .eq("id", id)
+    .single()
 
-  if (!usuario) {
+  if (error) {
     return res.status(404).json({
       mensagem: "Usuário não encontrado",
+      erro: error.message
     })
   }
 
-  res.json(usuario)
+  return res.json(data)
 })
 
 app.post("/usuarios", async (req, res) => {
@@ -78,31 +85,44 @@ app.post("/usuarios", async (req, res) => {
   })
 })
 
-app.put("/usuarios/:id", (req, res) => {
+app.put("/usuarios/:id", async (req, res) => {
+
   const id = Number(req.params.id)
 
-  const usuario = usuarios.find((usuario) => usuario.id === id)
+  const { nome, email} = req.body
 
-  if (!usuario) {
-    return res.status(404).json({
-      mensagem: "Usuário não encontrado!",
+  const { data, error } = await supabase
+    .from("usuarios")
+    .update({
+      nome: nome,
+      email: email
+    })
+    .eq("id:", id)
+    .select()
+
+  if (error) {
+    return res.status(500).json({
+      mensagem: "Erro ao atualizar usuário",
+      erro: error.message
     })
   }
 
-  usuario.nome = req.body.nome
-  usuario.email = req.body.email
+  if (data.length === 0){
+    return res.status(404).json({
+      mensagem: "Usuário não encontrado!"
+    })
+  }
 
   return res.json({
     mensagem: "Usuário atualizado com sucesso!",
-    usuario: usuario,
+    usuario: data[0]
   })
 })
 
 app.delete("/usuarios/:id", (req, res) => {
-
   const id = Number(req.params.id)
 
-  const indice = usuarios.findIndex(usuario => usuario.id === id)
+  const indice = usuarios.findIndex((usuario) => usuario.id === id)
 
   if (indice === -1) {
     return res.status(404).json({
