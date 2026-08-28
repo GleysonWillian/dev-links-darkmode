@@ -1,23 +1,8 @@
 const express = require("express")
 const app = express()
-const usuarios = []
-let proximoId = 1
 app.use(express.json())
 const port = 3000
 const supabase = require("./supabase")
-
-app.get("/teste-banco", async (req, res) => {
-  const { data, error } = await supabase.from("usuarios").select("*")
-
-  if (error) {
-    return res.status(500).json({
-      mensagem: "Erro ao consultar banco",
-      erro: error.message,
-    })
-  }
-
-  res.json(data)
-})
 
 app.get("/", (req, res) => {
   res.send("Olá. O meu primeiro servidor com express funcionou.")
@@ -97,7 +82,7 @@ app.put("/usuarios/:id", async (req, res) => {
       nome: nome,
       email: email
     })
-    .eq("id:", id)
+    .eq("id", id)
     .select()
 
   if (error) {
@@ -119,20 +104,33 @@ app.put("/usuarios/:id", async (req, res) => {
   })
 })
 
-app.delete("/usuarios/:id", (req, res) => {
+app.delete("/usuarios/:id", async (req, res) => {
+
   const id = Number(req.params.id)
 
-  const indice = usuarios.findIndex((usuario) => usuario.id === id)
+  const {data, error } = await supabase
+    .from("usuarios")
+    .delete()
+    .eq("id", id)
+    .select()
 
-  if (indice === -1) {
+  
+  if (error){
+    return res.status(500).json({
+      mensagem: "Erro ao excluir usuário",
+      erro: error.message
+    })
+  }
+
+  if (data.length === 0) {
     return res.status(404).json({
       mensagem: "Usuário não encontrado!",
     })
   }
-  usuarios.splice(indice, 1)
 
   return res.json({
     mensagem: "Usuário removido com sucesso!",
+    usuario: data[0]
   })
 })
 
