@@ -9,10 +9,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/usuarios", async (req, res) => {
-
-  const { data, error } = await supabase
-    .from("usuarios")
-    .select("*")
+  const { data, error } = await supabase.from("usuarios").select("*")
 
   if (error) {
     return res.status(500).json({
@@ -25,7 +22,6 @@ app.get("/usuarios", async (req, res) => {
 })
 
 app.get("/usuarios/:id", async (req, res) => {
-
   const id = Number(req.params.id)
 
   const { data, error } = await supabase
@@ -37,7 +33,7 @@ app.get("/usuarios/:id", async (req, res) => {
   if (error) {
     return res.status(404).json({
       mensagem: "Usuário não encontrado",
-      erro: error.message
+      erro: error.message,
     })
   }
 
@@ -46,6 +42,18 @@ app.get("/usuarios/:id", async (req, res) => {
 
 app.post("/usuarios", async (req, res) => {
   const { nome, email } = req.body
+
+  if (!nome || nome.trim() === "") {
+    return res.status(400).json({
+      mensagem: "Nome é obrigatório",
+    })
+  }
+
+  if (!email || email.trim() === "") {
+    return res.status(400).json({
+      mensagem: "Email é obrigatório",
+    })
+  }
 
   const { data, error } = await supabase
     .from("usuarios")
@@ -71,16 +79,15 @@ app.post("/usuarios", async (req, res) => {
 })
 
 app.put("/usuarios/:id", async (req, res) => {
-
   const id = Number(req.params.id)
 
-  const { nome, email} = req.body
+  const { nome, email } = req.body
 
   const { data, error } = await supabase
     .from("usuarios")
     .update({
       nome: nome,
-      email: email
+      email: email,
     })
     .eq("id", id)
     .select()
@@ -88,37 +95,35 @@ app.put("/usuarios/:id", async (req, res) => {
   if (error) {
     return res.status(500).json({
       mensagem: "Erro ao atualizar usuário",
-      erro: error.message
+      erro: error.message,
     })
   }
 
-  if (data.length === 0){
+  if (data.length === 0) {
     return res.status(404).json({
-      mensagem: "Usuário não encontrado!"
+      mensagem: "Usuário não encontrado!",
     })
   }
 
   return res.json({
     mensagem: "Usuário atualizado com sucesso!",
-    usuario: data[0]
+    usuario: data[0],
   })
 })
 
 app.delete("/usuarios/:id", async (req, res) => {
-
   const id = Number(req.params.id)
 
-  const {data, error } = await supabase
+  const { data, error } = await supabase
     .from("usuarios")
     .delete()
     .eq("id", id)
     .select()
 
-  
-  if (error){
+  if (error) {
     return res.status(500).json({
       mensagem: "Erro ao excluir usuário",
-      erro: error.message
+      erro: error.message,
     })
   }
 
@@ -130,7 +135,7 @@ app.delete("/usuarios/:id", async (req, res) => {
 
   return res.json({
     mensagem: "Usuário removido com sucesso!",
-    usuario: data[0]
+    usuario: data[0],
   })
 })
 
